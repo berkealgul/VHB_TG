@@ -1,2 +1,3 @@
 class hbg:
     pass
+    pass
