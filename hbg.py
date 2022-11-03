@@ -1,0 +1,2 @@
+class hbg:
+    pass
