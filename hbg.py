@@ -50,6 +50,7 @@ class hbg:
     def stop(self):
         self.writer.release()
         # command ffmpeg to create video frm sequence
+        # os.system("ffmpeg")
 
 
 # fast debug lines
