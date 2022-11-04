@@ -57,6 +57,7 @@ class hbtg:
         self.write_frame()
 
     def stop(self):
+        # ffmpeg assumes output is 25 fps. it is not a problem now but maybe it will need to be changed later
         os.system("ffmpeg -i output/images/%d.png -vcodec qtrle "+self.output_dir+"/"+self.video_name+".mov")
 
 
