@@ -3,6 +3,24 @@ import cv2
 import numpy as np
 
 
+class lsg:
+    def __init__(self, fps=25, output_dir="/output", video_name="output"):
+        self.fps = fps
+        self.video_name = video_name
+        self.output_dir = output_dir
+
+    def start(self, initial_air=1.0):
+        self.time = 0
+        self.air = min(1.0, initial_air) # range is [-1.0 1.0] below 0 represent water level
+
+    def set_air_level(self, new_air):
+        self.air = new_air
+
+    def stop(self):
+        # ffmpeg assumes output is 25 fps. it is not a problem now but maybe it will need to be changed later
+        os.system("ffmpeg -i output/images/%d.png -vcodec qtrle "+self.output_dir+"/"+self.video_name+".mov")
+
+
 class hbtg:
     def __init__(self, fps=25, output_dir="/output", video_name="output"):
         self.fps = fps
@@ -38,14 +56,6 @@ class hbtg:
         f = t*self.fps
         for i in range(t*self.fps):
             self.beat = self.beat + int((i * (final_beat - self.beat)) / f)
-            self.write_frame() 
-    
-    # x^2 function 
-    def rapid_change(self, t, final_beat):
-        # not finished
-        frames = t*self.fps
-        for i in range(t*self.fps):
-            self.beat = 0
             self.write_frame() 
 
     def constant_change(self, t):
