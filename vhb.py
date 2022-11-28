@@ -11,6 +11,7 @@ class lsg:
         self.resource_dir = resource_dir
         # todo: give colors for air level
         #       create inner mask for air
+        self.lung = cv2.imread(resource_dir+"/full_lung.png")
 
     def start(self, initial_air=1.0):
         self.time = 0
@@ -22,6 +23,23 @@ class lsg:
     def stop(self):
         # ffmpeg assumes output is 25 fps. it is not a problem now but maybe it will need to be changed later
         os.system("ffmpeg -i output/images/%d.png -vcodec qtrle "+self.output_dir+"/"+self.video_name+".mov")
+
+    def start(self, initial_air):
+        self.check_dirs()
+        self.set_air_level(initial_air)
+        self.time = 0
+        self.n_frames = 0
+
+    def check_dirs(self):
+        try:
+            os.makedirs(self.output_dir+"/images_lung") 
+        except OSError as error:
+            print("output dirs already created")
+
+    def write_frame(self):
+        frame = np.zeros((self.label_height + self.baseline, self.label_width, 4), np.uint8)
+        cv2.imwrite(self.output_dir+"/images/"+str(self.n_frames)+".png", frame)
+        self.n_frames = self.n_frames + 1
 
 
 class hbtg:
@@ -78,11 +96,15 @@ class hbtg:
 #cv2.imshow("img", frame)
 #cv2.waitKey(100)
 
-def test():
+def hbtg_test():
     h = hbtg(output_dir="./output")
     h.start(80)
     h.linear_change(10, 100)
     h.stop()
 
+def lsg_test():
+    lsg_ = lsg()
+
+
 if __name__ == "__main__":  
-    test()
+    lsg_test()
