@@ -25,7 +25,7 @@ cap = cv2.VideoCapture()
 cap.open("video.mp4") # change input if you want
 
 
-cv2.namedWindow("lol")a
+cv2.namedWindow("lol")
 cv2.setMouseCallback("lol", mouse_callback)
 
 while True:
