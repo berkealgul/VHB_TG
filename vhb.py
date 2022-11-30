@@ -4,13 +4,13 @@ import numpy as np
 
 
 class lsg:
-    def __init__(self, fps=25, output_dir="/output", video_name="output", resource_dir="/resources"):
+    def __init__(self, inner_color, outer_color, fps=25, output_dir="/output", video_name="output", resource_dir="/resources"):
         self.fps = fps
         self.video_name = video_name
         self.output_dir = output_dir
         self.resource_dir = resource_dir
-        # todo: give colors for air level
-        #       create inner mask for air
+        self.inner_color = inner_color
+        self.outer_color = outer_color
         self.lung = cv2.imread(resource_dir+"/full_lung.png")
 
     def start(self, initial_air=1.0):

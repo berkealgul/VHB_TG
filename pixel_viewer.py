@@ -8,15 +8,16 @@ you can hover mouse around desired location and gather information from terminal
 press a to exit application, b to pause/resume video
 """
 
-img = cv2.imread("resources/full_lung.png")
+img_ = cv2.imread("resources/full_lung_wb.png",cv2.IMREAD_UNCHANGED)
+img = cv2.cvtColor(img_,cv2.COLOR_BGR2BGRA) 
 
 pixel = np.zeros((150, 150, 3), np.uint8)
 pixel[:] = (10, 10, 10)
 
 def mouse_callback(event, x, y, flags, param):
 	# grab references to the global variables
-    global img
-    b, g, r = img[y,x,:]
+    global imga
+    b, g, r, aa = img[y,x,:]
     pixel[:] = (b, g, r)
     print("x:", x, " y:", y, " --  r:", r, " g:", g, " b:", b)
 
