@@ -4,14 +4,26 @@ import numpy as np
 
 
 class lsg:
-    def __init__(self, inner_color, outer_color, fps=25, output_dir="/output", video_name="output", resource_dir="/resources"):
+    def __init__(self, inner_color, outer_color, lung_dir, fps=25, output_dir="/output", video_name="output"):
         self.fps = fps
         self.video_name = video_name
         self.output_dir = output_dir
-        self.resource_dir = resource_dir
         self.inner_color = inner_color
         self.outer_color = outer_color
-        self.lung = cv2.imread(resource_dir+"/full_lung.png")
+        self.split_layers(lung_dir)
+
+    def split_layers(self, lung_dir):
+        lung = cv2.imread(lung_dir)
+        self.inner_lung = np.zeros(lung.shape)
+        self.outer_lung = lung
+
+        print(lung.shape)
+
+        #self.inner_lung = np.where(lung == self.inner_color, self.inner_lung, lung)
+
+        cv2.imshow("il", self.inner_lung)
+        #cv2.imshow("ol", self.outer_lung)
+        cv2.waitKey(1000)
 
     def start(self, initial_air=1.0):
         self.time = 0
@@ -43,7 +55,7 @@ class lsg:
 
 
 class hbtg:
-    def __init__(self, fps=25, output_dir="/output", video_name="output"):
+    def __init__(self, fps=25, output_dir="./output", video_name="output"):
         self.fps = fps
         self.video_name = video_name
         self.output_dir = output_dir
@@ -97,13 +109,13 @@ class hbtg:
 #cv2.waitKey(100)
 
 def hbtg_test():
-    h = hbtg(output_dir="./output")
+    h = hbtg()
     h.start(80)
     h.linear_change(10, 100)
     h.stop()
 
 def lsg_test():
-    lsg_ = lsg()
+    lsg_ = lsg((0,216,255), (4, 77, 249), "resources/full_lung_wb.png")
 
 
 if __name__ == "__main__":  
