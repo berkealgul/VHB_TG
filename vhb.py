@@ -19,16 +19,20 @@ class lsg:
         #masked = cv2.bitwise_and(lung,lung, mask=mask)
         #self.inner_lung = lung - masked
         self.inner_lung = self.extract_color(lung, self.inner_color)
+        #print(np.count_nonzero(self.inner_lung))
     
         cv2.imshow("il", self.inner_lung)
         #cv2.imshow("ol", self.outer_lung)
-        cv2.waitKey(2000)
+        cv2.waitKey(1500)
 
     def extract_color(self, img, color):
-        mask = np.zeros(img.shape)
-        for r in range(img.shape[0]):
-            for c in range(img.shape[1]):
-                mask[r,c,:] = (255,0,0)
+        # source image is rgb but seperated layers will be rgba
+        mask = np.zeros((img.shape[0], img.shape[1], 4))
+        # opencv uses bgr structure but param color is rgb
+        print()
+        for i in range(3):
+            
+            mask[:,:,i] = np.where(mask[:,:,i] == color[2-i], color[2-i], 0)     
         return mask
 
     def start(self, initial_air=1.0):
