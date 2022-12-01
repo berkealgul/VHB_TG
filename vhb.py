@@ -14,16 +14,22 @@ class lsg:
 
     def split_layers(self, lung_dir):
         lung = cv2.imread(lung_dir)
-        self.inner_lung = np.zeros(lung.shape)
-        self.outer_lung = lung
 
-        print(lung.shape)
-
-        #self.inner_lung = np.where(lung == self.inner_color, self.inner_lung, lung)
-
+        #mask = cv2.inRange(lung, self.inner_color, self.same(self.inner_color))
+        #masked = cv2.bitwise_and(lung,lung, mask=mask)
+        #self.inner_lung = lung - masked
+        self.inner_lung = self.extract_color(lung, self.inner_color)
+    
         cv2.imshow("il", self.inner_lung)
         #cv2.imshow("ol", self.outer_lung)
-        cv2.waitKey(1000)
+        cv2.waitKey(2000)
+
+    def extract_color(self, img, color):
+        mask = np.zeros(img.shape)
+        for r in range(img.shape[0]):
+            for c in range(img.shape[1]):
+                mask[r,c,:] = (255,0,0)
+        return mask
 
     def start(self, initial_air=1.0):
         self.time = 0
