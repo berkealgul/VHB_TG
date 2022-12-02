@@ -8,6 +8,7 @@ class lsg:
         self.fps = fps
         self.video_name = video_name
         self.output_dir = output_dir
+        # BGR format
         self.inner_color = inner_color
         self.outer_color = outer_color
         self.split_layers(lung_dir)
@@ -15,24 +16,18 @@ class lsg:
     def split_layers(self, lung_dir):
         lung = cv2.imread(lung_dir)
 
-        #mask = cv2.inRange(lung, self.inner_color, self.same(self.inner_color))
-        #masked = cv2.bitwise_and(lung,lung, mask=mask)
-        #self.inner_lung = lung - masked
         self.inner_lung = self.extract_color(lung, self.inner_color)
-        #print(np.count_nonzero(self.inner_lung))
+        self.outer_lung = self.extract_color(lung, self.outer_color)
     
-        cv2.imshow("il", self.inner_lung)
-        #cv2.imshow("ol", self.outer_lung)
-        cv2.waitKey(1500)
+        # cv2.imshow("il", self.inner_lung)
+        # cv2.imshow("ol", self.outer_lung)
+        # cv2.waitKey(1500)
 
     def extract_color(self, img, color):
         # source image is rgb but seperated layers will be rgba
         mask = np.zeros((img.shape[0], img.shape[1], 4))
-        # opencv uses bgr structure but param color is rgb
-        print()
         for i in range(3):
-            
-            mask[:,:,i] = np.where(mask[:,:,i] == color[2-i], color[2-i], 0)     
+            mask[:,:,i] = np.where(img[:,:,i] == color[i], color[i], 0)     
         return mask
 
     def start(self, initial_air=1.0):
@@ -125,7 +120,7 @@ def hbtg_test():
     h.stop()
 
 def lsg_test():
-    lsg_ = lsg((0,216,255), (4, 77, 249), "resources/full_lung_wb.png")
+    lsg_ = lsg((255,216,0), (249, 77, 4), "resources/full_lung_wb.png")
 
 
 if __name__ == "__main__":  
