@@ -15,10 +15,8 @@ class lsg:
 
     def split_layers(self, lung_dir):
         lung = cv2.imread(lung_dir)
-
         self.inner_lung = self.extract_color(lung, self.inner_color)
         self.outer_lung = self.extract_color(lung, self.outer_color)
-    
         # cv2.imshow("il", self.inner_lung)
         # cv2.imshow("ol", self.outer_lung)
         # cv2.waitKey(1500)
