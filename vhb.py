@@ -1,20 +1,20 @@
 import os
 import cv2
 import numpy as np
+from math import sin, pi
 
 
+# TODO: add alpha channel to lsg images
 
 class lsg:
-    def __init__(self, inner_color, outer_color, lung_dir, fps=25, output_dir="./output", video_name="output"):    
+    def __init__(self, inner_color, outer_color, lung_dir, fps=25, anim_len=25, breating_size=1.3, output_dir="./output", video_name="output"):    
         self.fps = fps
         self.video_name = video_name
         self.output_dir = output_dir
-        # BGR format
-        self.inner_color = inner_color
+        self.inner_color = inner_color # BGR format
         self.outer_color = outer_color
-        # constants
-        self.anim_len = 10 # len in frames
-        self.breating_size = 1.15
+        self.anim_len = anim_len # len in frames
+        self.breating_size = anim_len # max size of lung and must be >1
         # funcs
         self.split_layers(lung_dir)
 
@@ -24,17 +24,20 @@ class lsg:
         w0, h0 = lung.shape[1], lung.shape[0]
         for i in range(self.anim_len):
             # dunno why but w and h increases at different scale
-            w = w0 + int(w0*(i/self.anim_len)*(self.breating_size-1))
-            h = h0 + int(h0*(i/self.anim_len)*(self.breating_size-1))
+            scale = (self.breating_size-1) * sin(pi*(i/self.anim_len)) + 1
+            w = int(w0*scale)
+            h = int(h0*scale)
             frame = cv2.resize(lung, (w,h), interpolation = cv2.INTER_AREA)
+            # cut the surrounding to remain the frame at original size
             bl = int((w-w0)/2)
             br = w - bl
             bu = int((h-h0)/2)
             bd = h - bu
-            # god know how but  frame remains at 1080x1000
+            # god know how but frame remains at 1080x1000
             self.write_frame(frame[bu:bd, bl:br, :])
-            print(frame[bu:bd, bl:br, :].shape)
-            print(w,h)
+            # print(frame[bu:bd, bl:br, :].shape)
+            # print(w,h)
+            # print(sin(pi))
 
     def split_layers(self, lung_dir):
         lung = cv2.imread(lung_dir)
@@ -54,9 +57,18 @@ class lsg:
     def start(self, initial_air=1.0):
         self.check_dirs()
         self.time = 0
-        self.air = min(1.0, initial_air) # range is [-1.0 1.0] below 0 represent water level
-        self.time = 0
+        self.air = initial_air
         self.n_frames = 0
+
+    def linear_change(self, t, final_beat):
+        f = t*self.fps
+        for i in range(t*self.fps):
+            self.beat = self.beat + int((i * (final_beat - self.beat)) / f)
+            self.write_frame() 
+
+    def constant_change(self, t):
+        for i in range(t*self.fps):
+            self.write_frame() 
 
     def set_air_level(self, new_air):
         self.air = new_air
@@ -68,6 +80,13 @@ class lsg:
             print("output dirs already created")
 
     def write_frame(self, frame):
+        cv2.imwrite(self.output_dir+"/images_lung/"+str(self.n_frames)+".png", frame)
+        self.n_frames = self.n_frames + 1
+    
+    def write_frame(self):
+        # todo: calculate inner lung size and color to represent air/water amounts
+        return
+        frame = self.inner_lung + self.outer_lung
         cv2.imwrite(self.output_dir+"/images_lung/"+str(self.n_frames)+".png", frame)
         self.n_frames = self.n_frames + 1
     
@@ -141,7 +160,7 @@ def lsg_test():
     lsg_ = lsg((255,216,0), (249, 77, 4), "resources/full_lung_wb.png")
     lsg_.start()
     lsg_.animate_breating()
-    #lsg_.stop()
+    lsg_.stop()
 
 if __name__ == "__main__":  
     lsg_test()
