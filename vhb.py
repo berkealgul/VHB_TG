@@ -7,24 +7,25 @@ from math import sin, pi
 # TODO: add alpha channel to lsg images
 
 class lsg:
-    def __init__(self, inner_color, outer_color, lung_dir, fps=25, anim_len=25, breating_size=1.3, output_dir="./output", video_name="output"):    
+    def __init__(self, inner_color, outer_color, lung_dir, fps=25, anim_len=5, breating_size=1.3, output_dir="./output", video_name="output"):    
         self.fps = fps
         self.video_name = video_name
         self.output_dir = output_dir
         self.inner_color = inner_color # BGR format
         self.outer_color = outer_color
-        self.anim_len = anim_len # len in frames
+        self.anim_len = anim_len # len in secs
         self.breating_size = anim_len # max size of lung and must be >1
         # funcs
         self.split_layers(lung_dir)
 
     # animates 1 breating cycle
     def animate_breating(self):
+        anim_frames = self.anim_len*self.fps
         lung = self.inner_lung + self.outer_lung
         w0, h0 = lung.shape[1], lung.shape[0]
-        for i in range(self.anim_len):
+        for i in range(anim_frames):
             # dunno why but w and h increases at different scale
-            scale = (self.breating_size-1) * sin(pi*(i/self.anim_len)) + 1
+            scale = (self.breating_size-1) * sin(pi*(i/anim_frames)) + 1
             w = int(w0*scale)
             h = int(h0*scale)
             frame = cv2.resize(lung, (w,h), interpolation = cv2.INTER_AREA)
