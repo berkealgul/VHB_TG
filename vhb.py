@@ -14,9 +14,44 @@ class lsg:
         self.inner_color = inner_color # BGR format
         self.outer_color = outer_color
         self.anim_len = anim_len # len in secs
-        self.breating_size = anim_len # max size of lung and must be >1
+        self.breating_size = breating_size # max size of lung and must be >1
+        self.inner_lung = None # in&outer lungs are assinged at split_layers()
+        self.outer_lung = None
+        self.inner_lung_up = -1  # they are upper and lower limit of inner lung
+        self.inner_lung_low = -1 # both are calculated at calculate_inner_lung_borders()
+        self.time = 0
+        self.air = 0
+        self.n_frames = 0
         # funcs
         self.split_layers(lung_dir)
+        self.calculate_inner_lung_borders()
+
+    def calculate_inner_lung_borders(self):
+        # search for up
+        for i in range(self.inner_lung.shape[0]):
+            b  = (self.inner_lung[i,:,0] == self.inner_color[0]).any()
+            g  = (self.inner_lung[i,:,1] == self.inner_color[1]).any()
+            r  = (self.inner_lung[i,:,2] == self.inner_color[2]).any()
+
+            if b and g and r:
+                self.inner_lung_up = i
+                break
+        
+        # search for low
+        for i in range(self.inner_lung.shape[1]-1, 0, -1):
+            b  = (self.inner_lung[i,:,0] == self.inner_color[0]).any()
+            g  = (self.inner_lung[i,:,1] == self.inner_color[1]).any()
+            r  = (self.inner_lung[i,:,2] == self.inner_color[2]).any()
+
+            if b and g and r:
+                self.inner_lung_low = i
+                break
+        
+        if self.inner_lung_low == -1 or self.inner_lung_up == -1:
+            raise ValueError("Inner lung range is not desired (up, low) = ", "(", self.inner_lung_up, " ", self.inner_lung_low, ")")
+        
+        print("ranges ","(", self.inner_lung_up, " ", self.inner_lung_low, ")")
+
 
     # animates 1 breating cycle
     def animate_breating(self):
@@ -88,8 +123,7 @@ class lsg:
         # todo: calculate inner lung size and color to represent air/water amounts
         return
         frame = self.inner_lung + self.outer_lung
-        cv2.imwrite(self.output_dir+"/images_lung/"+str(self.n_frames)+".png", frame)
-        self.n_frames = self.n_frames + 1
+        self.write_frame(frame)
     
     def stop(self):
         # ffmpeg assumes output is 25 fps. it is not a problem now but maybe it will need to be changed later
@@ -159,9 +193,9 @@ def hbtg_test():
 
 def lsg_test():
     lsg_ = lsg((255,216,0), (249, 77, 4), "resources/full_lung_wb.png")
-    lsg_.start()
-    lsg_.animate_breating()
-    lsg_.stop()
+    # lsg_.start()
+    # lsg_.animate_breating()
+    # lsg_.stop()
 
 if __name__ == "__main__":  
     lsg_test()
