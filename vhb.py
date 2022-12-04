@@ -13,17 +13,19 @@ class lsg:
         self.output_dir = output_dir
         self.inner_color = inner_color # BGR format
         self.outer_color = outer_color
+        self.inner_water_color = (255,255,255)
         self.anim_len = anim_len # len in secs
         self.breating_size = breating_size # max size of lung and must be >1
-        self.inner_lung = None # in&outer lungs are assinged at split_layers()
+        self.inner_lung = None # in&outer and water in lungs are assinged at init_layers()
         self.outer_lung = None
+        self.inner_water_lung = None #todo: initialize this
         self.inner_lung_up = -1  # they are upper and lower limit of inner lung
         self.inner_lung_low = -1 # both are calculated at calculate_inner_lung_borders()
         self.time = 0
         self.air = 0
         self.n_frames = 0
         # funcs
-        self.split_layers(lung_dir)
+        self.init_layers(lung_dir)
         self.calculate_inner_lung_borders()
 
     def calculate_inner_lung_borders(self):
@@ -48,10 +50,8 @@ class lsg:
                 break
         
         if self.inner_lung_low == -1 or self.inner_lung_up == -1:
-            raise ValueError("Inner lung range is not desired (up, low) = ", "(", self.inner_lung_up, " ", self.inner_lung_low, ")")
-        
-        print("ranges ","(", self.inner_lung_up, " ", self.inner_lung_low, ")")
-
+            raise ValueError("Inner lung range is not desired (up, low)", self.inner_lung_up,  self.inner_lung_low)
+        #print("ranges ","(", self.inner_lung_up, " ", self.inner_lung_low, ")")
 
     # animates 1 breating cycle
     def animate_breating(self):
@@ -75,10 +75,11 @@ class lsg:
             # print(w,h)
             # print(sin(pi))
 
-    def split_layers(self, lung_dir):
+    def init_layers(self, lung_dir):
         lung = cv2.imread(lung_dir)
         self.inner_lung = self.extract_color(lung, self.inner_color)
         self.outer_lung = self.extract_color(lung, self.outer_color)
+
         # cv2.imshow("il", self.inner_lung)
         # cv2.imshow("ol", self.outer_lung)
         # cv2.waitKey(1500)
@@ -120,9 +121,15 @@ class lsg:
         self.n_frames = self.n_frames + 1
     
     def write_frame(self):
-        # todo: calculate inner lung size and color to represent air/water amounts
-        return
-        frame = self.inner_lung + self.outer_lung
+        # if lung is filled with water then chose water filled lung
+        if self.air > 1:
+            inner_lung = self.inner_lung
+        else:
+            inner_lung = self.inner_water_lung
+
+        upper_range = self.inner_lung_up + (self.inner_lung_low - self.inner_lung_up) * abs(self.air)
+        innet_lung = innet_lung[:upper_range,:,:] # TODO: erase above of upper range
+        frame = inner_lung + self.outer_lung
         self.write_frame(frame)
     
     def stop(self):
