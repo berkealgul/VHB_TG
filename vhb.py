@@ -7,6 +7,9 @@ from math import sin, pi
 # TODO: add alpha channel to lsg images
 # NOTE: imshow displays different colors. discovered at init_layers() and must research it
 
+# TODO: 1- test inner lung sizing
+#       2- implement air lv change functions  
+
 class lsg:
     def __init__(self, inner_color, outer_color, inner_water_color, lung_dir, fps=25, anim_len=5, breating_size=1.3, output_dir="./output", video_name="output"):    
         self.fps = fps
