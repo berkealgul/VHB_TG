@@ -79,9 +79,16 @@ class lsg:
         lung = cv2.imread(lung_dir)
         self.inner_lung = self.extract_color(lung, self.inner_color)
         self.outer_lung = self.extract_color(lung, self.outer_color)
+        
+        # initialize water filled lung
+        self.inner_water_lung = np.zeros(self.inner_lung.shape)
+        self.inner_water_lung[:,:,0] = np.where(self.inner_lung[:,:,0] == self.inner_color[0], self.inner_water_color[0], 0)
+        self.inner_water_lung[:,:,1] = np.where(self.inner_lung[:,:,1] == self.inner_color[1], self.inner_water_color[1], 0)   
+        self.inner_water_lung[:,:,2] = np.where(self.inner_lung[:,:,2] == self.inner_color[2], self.inner_water_color[2], 0)   
 
         # cv2.imshow("il", self.inner_lung)
         # cv2.imshow("ol", self.outer_lung)
+        # cv2.imshow("iwl", self.inner_water_lung)
         # cv2.waitKey(1500)
 
     def extract_color(self, img, color):
@@ -128,8 +135,9 @@ class lsg:
             inner_lung = self.inner_water_lung
 
         upper_range = self.inner_lung_up + (self.inner_lung_low - self.inner_lung_up) * abs(self.air)
-        innet_lung = innet_lung[:upper_range,:,:] # TODO: erase above of upper range
-        frame = inner_lung + self.outer_lung
+        inner_lung_sized = np.copy(inner_lung) 
+        inner_lung_sized[:upper_range] = 0
+        frame = inner_lung_sized + self.outer_lung
         self.write_frame(frame)
     
     def stop(self):
