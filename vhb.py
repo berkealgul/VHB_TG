@@ -98,7 +98,7 @@ class lsg:
 
     def extract_color(self, img, color):
         # source image is rgb but seperated layers will be rgba
-        mask = np.zeros(img.shape)
+        mask = np.zeros((img.shape[0], img.shape[1], 4))
         for i in range(3):
             mask[:,:,i] = np.where(img[:,:,i] == color[i], color[i], 0)     
         return mask
