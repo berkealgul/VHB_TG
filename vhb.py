@@ -212,7 +212,7 @@ def lsg_test():
     lsg_ = lsg((255,216,0), (249, 77, 4), (124, 224, 9), "resources/full_lung_wb.png")
     lsg_.start(initial_air=-0.75)
     # lsg_.animate_breating()
-    lsg_.constant_change(5)
+    lsg_.linear_change(5, 1)
     lsg_.stop()
 
 if __name__ == "__main__":  
