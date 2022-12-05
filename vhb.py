@@ -1,14 +1,12 @@
 import os
 import cv2
 import numpy as np
+import shutil
 from math import sin, pi
 
 
 # TODO: add alpha channel to lsg images
 # NOTE: imshow displays different colors. discovered at init_layers() and must research it
-
-# TODO: 1- test inner lung sizing
-#       2- implement air lv change functions  
 
 class lsg:
     def __init__(self, inner_color, outer_color, inner_water_color, lung_dir, fps=25, anim_len=5, breating_size=1.3, output_dir="./output", video_name="output"):    
@@ -25,7 +23,6 @@ class lsg:
         self.inner_water_lung = None 
         self.inner_lung_up = -1  # they are upper and lower limit of inner lung
         self.inner_lung_low = -1 # both are calculated at calculate_inner_lung_borders()
-        self.time = 0
         self.air = 0
         self.n_frames = 0
         # funcs
@@ -108,14 +105,13 @@ class lsg:
 
     def start(self, initial_air=1.0):
         self.check_dirs()
-        self.time = 0
         self.air = initial_air
         self.n_frames = 0
 
-    def linear_change(self, t, final_beat):
+    def linear_change(self, t, final_air):
         f = t*self.fps
-        for i in range(t*self.fps):
-            self.beat = self.beat + int((i * (final_beat - self.beat)) / f)
+        for i in range(f):
+            self.air = self.air + int((i * (final_air - self.air)) / f)
             self.write_frame() 
 
     def constant_change(self, t):
@@ -130,28 +126,27 @@ class lsg:
             os.makedirs(self.output_dir+"/images_lung") 
         except OSError as error:
             print("output dirs already created")
+    
+    def write_frame(self, frame=None):
+        if frame == None:
+            # if lung is filled with water then chose water filled lung
+            if self.air > 1:
+                inner_lung = self.inner_lung
+            else:
+                inner_lung = self.inner_water_lung
 
-    def write_frame(self, frame):
+            upper_range = int(self.inner_lung_up + (self.inner_lung_low - self.inner_lung_up) * (1 - abs(self.air)))
+            inner_lung_sized = np.copy(inner_lung) 
+            inner_lung_sized[:upper_range] = 0
+            frame = inner_lung_sized + self.outer_lung
+
         cv2.imwrite(self.output_dir+"/images_lung/"+str(self.n_frames)+".png", frame)
         self.n_frames = self.n_frames + 1
-    
-    def write_frame(self):
-        # if lung is filled with water then chose water filled lung
-        if self.air > 1:
-            inner_lung = self.inner_lung
-        else:
-            inner_lung = self.inner_water_lung
-
-        upper_range = self.inner_lung_up + (self.inner_lung_low - self.inner_lung_up) * abs(self.air)
-        inner_lung_sized = np.copy(inner_lung) 
-        inner_lung_sized[:upper_range] = 0
-        frame = inner_lung_sized + self.outer_lung
-        self.write_frame(frame)
     
     def stop(self):
         # ffmpeg assumes output is 25 fps. it is not a problem now but maybe it will need to be changed later
         os.system("ffmpeg -i "+self.output_dir+"/images_lung/%d.png -vcodec qtrle "+self.output_dir+"/"+self.video_name+".mov")
-
+        shutil.rmtree(self.output_dir+"/images_lung/")
 
 
 class hbtg:
@@ -167,7 +162,6 @@ class hbtg:
     def start(self, initial_beat):
         self.check_dirs()
         self.beat = initial_beat
-        self.time = 0
         self.n_frames = 0
 
     def check_dirs(self):
@@ -187,7 +181,7 @@ class hbtg:
     # linear function 
     def linear_change(self, t, final_beat):
         f = t*self.fps
-        for i in range(t*self.fps):
+        for i in range(f):
             self.beat = self.beat + int((i * (final_beat - self.beat)) / f)
             self.write_frame() 
 
@@ -201,8 +195,8 @@ class hbtg:
 
     def stop(self):
         # ffmpeg assumes output is 25 fps. it is not a problem now but maybe it will need to be changed later
-        os.system("ffmpeg -i output/images/%d.png -vcodec qtrle "+self.output_dir+"/"+self.video_name+".mov")
-
+        os.system("ffmpeg -i "+self.output_dir+"/images/%d.png -vcodec qtrle "+self.output_dir+"/"+self.video_name+".mov")
+        shutil.rmtree(self.output_dir+"/images/")
 
 # fast debug lines
 #cv2.imshow("img", frame)
@@ -216,9 +210,10 @@ def hbtg_test():
 
 def lsg_test():
     lsg_ = lsg((255,216,0), (249, 77, 4), (124, 224, 9), "resources/full_lung_wb.png")
-    # lsg_.start()
+    lsg_.start(initial_air=-0.15)
     # lsg_.animate_breating()
-    # lsg_.stop()
+    lsg_.constant_change(5)
+    lsg_.stop()
 
 if __name__ == "__main__":  
     lsg_test()
