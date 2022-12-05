@@ -130,7 +130,7 @@ class lsg:
     def write_frame(self, frame=None):
         if frame == None:
             # if lung is filled with water then chose water filled lung
-            if self.air > 1:
+            if self.air > 0:
                 inner_lung = self.inner_lung
             else:
                 inner_lung = self.inner_water_lung
@@ -210,7 +210,7 @@ def hbtg_test():
 
 def lsg_test():
     lsg_ = lsg((255,216,0), (249, 77, 4), (124, 224, 9), "resources/full_lung_wb.png")
-    lsg_.start(initial_air=-0.15)
+    lsg_.start(initial_air=-0.75)
     # lsg_.animate_breating()
     lsg_.constant_change(5)
     lsg_.stop()
