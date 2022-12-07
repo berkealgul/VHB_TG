@@ -53,10 +53,10 @@ class lsg:
         if self.inner_lung_low == -1 or self.inner_lung_up == -1:
             raise ValueError("Inner lung range is not desired (up, low)", self.inner_lung_up,  self.inner_lung_low)
         #print("ranges ","(", self.inner_lung_up, " ", self.inner_lung_low, ")")
-
+    
     # animates 1 breating cycle
     def animate_breating(self):
-        anim_frames = self.anim_len*self.fps
+        anim_frames = int(self.anim_len*self.fps)
         lung = self.inner_lung + self.outer_lung
         w0, h0 = lung.shape[1], lung.shape[0]
         for i in range(anim_frames):
@@ -111,12 +111,21 @@ class lsg:
     def linear_change(self, t, final_air):
         f = t*self.fps
         for i in range(f):
-            self.air = self.air + int((i * (final_air - self.air)) / f)
+            self.air = self.air + (final_air - self.air) / f
             self.write_frame() 
+        print("linear change time : ", t)
 
     def constant_change(self, t):
         for i in range(t*self.fps):
             self.write_frame() 
+        print("constant change time : ", t)
+
+    def breathe(self, t):
+        time = 0
+        while time < t:
+            self.animate_breating()
+            time += self.anim_len
+        print("breathing time : ", t)
 
     def set_air_level(self, new_air):
         self.air = new_air
@@ -128,7 +137,7 @@ class lsg:
             print("output dirs already created")
     
     def write_frame(self, frame=None):
-        if frame == None:
+        if frame is None:
             # if lung is filled with water then chose water filled lung
             if self.air > 0:
                 inner_lung = self.inner_lung
@@ -182,16 +191,19 @@ class hbtg:
     def linear_change(self, t, final_beat):
         f = t*self.fps
         for i in range(f):
-            self.beat = self.beat + int((i * (final_beat - self.beat)) / f)
+            self.beat = self.beat + int((final_beat - self.beat) / f)
             self.write_frame() 
+        print("linear change time : ", t)
 
     def constant_change(self, t):
         for i in range(t*self.fps):
             self.write_frame() 
+        print("constant change time : ", t)
     
     def sudden_change(self, new_beat):
         self.beat = new_beat
         self.write_frame()
+        print("sudden change")
 
     def stop(self):
         # ffmpeg assumes output is 25 fps. it is not a problem now but maybe it will need to be changed later
