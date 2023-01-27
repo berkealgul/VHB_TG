@@ -8,7 +8,7 @@ you can hover mouse around desired location and gather information from terminal
 press a to exit application, b to pause/resume video
 """
 
-img = cv2.imread("resources/full_lung_wb.png",cv2.IMREAD_UNCHANGED)
+img = cv2.imread("resources/full_lung_2.png",cv2.IMREAD_UNCHANGED)
 #img = cv2.cvtColor(img_,cv2.COLOR_BGR2BGRA) 
 
 pixel = np.zeros((150, 150, 3), np.uint8)

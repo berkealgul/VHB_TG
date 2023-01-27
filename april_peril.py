@@ -1,7 +1,7 @@
 from vhb import lsg, hbtg
 
 
-lsg_ = lsg((255,216,0), (249, 77, 4), (124, 224, 9), "resources/full_lung_wb.png", video_name="lung", anim_len=2.5)
+lsg_ = lsg((72,255,0), (249, 77, 4), (255,216,0), "resources/full_lung_2.png", video_name="lung", anim_len=2.5)
 
 lsg_.start(initial_air=1.0)
 lsg_.breathe(25)
